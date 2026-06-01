@@ -33,26 +33,57 @@ function Sheet({ open, onClose, title, children, maxHeight = '86%', footer }) {
   }, [mounted, open]);
   if (!mounted) return null;
 
-  // ── Swipe-down handlers (ハンドル領域でドラッグして閉じる) ──
-  const onDragStart = (e) => {
+  // ── Swipe-down handlers ──
+  // ハンドル領域：常にドラッグ可能（mode='drag'）
+  // コンテンツ領域：scrollTop=0 で下方向に引いた時のみドラッグ判定（scroll/dragを自動判別）
+  const scrollRef = useRef(null);
+
+  const onHandleStart = (e) => {
     const y = e.touches ? e.touches[0].clientY : e.clientY;
-    dragStartRef.current = { startY: y, startTime: Date.now() };
+    dragStartRef.current = { startY: y, startTime: Date.now(), mode: 'drag' };
     setDragging(true);
   };
-  const onDragMove = (e) => {
-    if (!dragStartRef.current) return;
+
+  const onContentStart = (e) => {
     const y = e.touches ? e.touches[0].clientY : e.clientY;
-    const dy = Math.max(0, y - dragStartRef.current.startY);
-    setDragY(dy);
+    dragStartRef.current = {
+      startY: y, startTime: Date.now(),
+      scrollTop: scrollRef.current ? scrollRef.current.scrollTop : 0,
+      mode: 'pending', // 最初の動きで scroll か drag か決定
+    };
   };
+
+  const onDragMove = (e) => {
+    const s = dragStartRef.current;
+    if (!s) return;
+    const y = e.touches ? e.touches[0].clientY : e.clientY;
+    const dy = y - s.startY;
+
+    if (s.mode === 'pending') {
+      if (Math.abs(dy) < 4) return; // 動きが小さすぎる時は判定保留
+      if (s.scrollTop === 0 && dy > 0) {
+        s.mode = 'drag';
+        setDragging(true);
+      } else {
+        s.mode = 'scroll';
+      }
+    }
+
+    if (s.mode === 'drag') {
+      setDragY(Math.max(0, dy));
+    }
+    // mode === 'scroll' なら何もしない（ブラウザに任せる）
+  };
+
   const onDragEnd = (e) => {
-    if (!dragStartRef.current) return;
-    const { startY, startTime } = dragStartRef.current;
-    const y = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
-    const dy = Math.max(0, y - startY);
-    const dt = Math.max(1, Date.now() - startTime);
-    const velocity = dy / dt; // px / ms
+    const s = dragStartRef.current;
+    if (!s) return;
     dragStartRef.current = null;
+    if (s.mode !== 'drag') { setDragging(false); return; }
+    const y = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+    const dy = Math.max(0, y - s.startY);
+    const dt = Math.max(1, Date.now() - s.startTime);
+    const velocity = dy / dt; // px / ms
     setDragging(false);
     if (dy > 100 || velocity > 0.5) {
       onClose();
@@ -86,9 +117,9 @@ function Sheet({ open, onClose, title, children, maxHeight = '86%', footer }) {
         transform: baseTransform,
         transition,
       }}>
-        {/* handle (ドラッグで閉じる) */}
+        {/* handle (ハンドルからドラッグで閉じる) */}
         <div
-          onTouchStart={onDragStart}
+          onTouchStart={onHandleStart}
           onTouchMove={onDragMove}
           onTouchEnd={onDragEnd}
           onTouchCancel={onDragEnd}
@@ -101,10 +132,16 @@ function Sheet({ open, onClose, title, children, maxHeight = '86%', footer }) {
           <div style={{ width:40, height:5, borderRadius:3, background:'rgba(27,44,42,.18)' }} />
         </div>
         {title && (
-          <div style={{
-            display:'flex', alignItems:'center', justifyContent:'space-between',
-            padding:'10px 20px 12px',
-          }}>
+          <div
+            onTouchStart={onHandleStart}
+            onTouchMove={onDragMove}
+            onTouchEnd={onDragEnd}
+            onTouchCancel={onDragEnd}
+            style={{
+              display:'flex', alignItems:'center', justifyContent:'space-between',
+              padding:'10px 20px 12px',
+              touchAction:'none',
+            }}>
             <h2 style={{ margin:0, fontSize:20, fontWeight:700, letterSpacing:'-.01em' }}>{title}</h2>
             <button onClick={onClose} style={{
               width:32, height:32, borderRadius:'50%', border:'none',
@@ -112,7 +149,16 @@ function Sheet({ open, onClose, title, children, maxHeight = '86%', footer }) {
             }}><Icon name="x" size={17} color="var(--ink-2)" stroke={2.4} /></button>
           </div>
         )}
-        <div className="hide-scroll" style={{ overflowY:'auto', padding:'0 20px', flex:1 }}>{children}</div>
+        <div
+          ref={scrollRef}
+          className="hide-scroll"
+          onTouchStart={onContentStart}
+          onTouchMove={onDragMove}
+          onTouchEnd={onDragEnd}
+          onTouchCancel={onDragEnd}
+          style={{ overflowY:'auto', padding:'0 20px', flex:1 }}>
+          {children}
+        </div>
         {footer && <div style={{ padding:'12px 20px calc(12px + env(safe-area-inset-bottom))' }}>{footer}</div>}
       </div>
     </div>
