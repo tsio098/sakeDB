@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>日本酒DB</title>
+
+<!-- PWA: iPhone「ホーム画面に追加」用 -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#68A69B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="日本酒DB">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+<link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- App styles -->
+<link rel="stylesheet" href="styles.css">
+
+<style>
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: #cdd9da;
+    background-image:
+      radial-gradient(120% 80% at 20% 0%, #d8e7e8 0%, transparent 60%),
+      radial-gradient(120% 90% at 90% 100%, #e7ddb6 0%, transparent 55%),
+      linear-gradient(160deg, #cfe0e1, #c0d7d3);
+    min-height: 100%;
+    overscroll-behavior: none;
+  }
+  /* PWA standalone（ホーム画面起動）時はセーフエリアを尊重 */
+  @media all and (display-mode: standalone) {
+    body { background: var(--bg, #cfe0e1); }
+  }
+  #root { min-height: 100vh; min-height: 100dvh; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<!-- React + Babel (CDN, ビルド不要) -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin></script>
+
+<!-- Data & API -->
+<script src="data.js"></script>
+<script src="api.js"></script>
+
+<!-- App components -->
+<script type="text/babel" src="components.jsx"></script>
+<script type="text/babel" src="screens-home.jsx"></script>
+<script type="text/babel" src="sheets.jsx"></script>
+<script type="text/babel" src="detail.jsx"></script>
+<script type="text/babel" src="add.jsx"></script>
+<script type="text/babel" src="browse.jsx"></script>
+<script type="text/babel" src="app.jsx"></script>
+
+<!-- Service Worker（オフラインキャッシュ） -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js').catch(console.error);
+    });
+  }
+</script>
+</body>
+</html>

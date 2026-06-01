@@ -1,0 +1,145 @@
+/* ───────────────────────────────────────────────────────────
+   日本酒DB — Design tokens & global styles
+   Apple-native × Glassmorphism (Liquid Glass)
+   爽快 / クリーン / 未来志向 — light, airy, frosted
+   ─────────────────────────────────────────────────────────── */
+
+:root {
+  /* Palette (from brief) */
+  --pale-blue:   #D1E3E6;
+  --mint-grey:   #B4D9D5;
+  --emerald:     #68A69B;
+  --pale-yellow: #F2E6A7;
+  --gold:        #F2CD5C;
+
+  /* Ink (warm-cool, never pure black) */
+  --ink:    #1b2c2a;
+  --ink-2:  #415955;
+  --ink-3:  #6f8682;
+  --line:   rgba(255,255,255,.6);   /* glass highlight edge */
+  --hair:   rgba(27,44,42,.08);     /* subtle separators */
+
+  /* Accent shades */
+  --emerald-deep: #437a6e;
+  --emerald-soft: #e4f0ed;
+  --gold-deep:    #9a7416;
+
+  /* Glass surfaces */
+  --glass:        rgba(255,255,255,.52);
+  --glass-strong: rgba(255,255,255,.66);
+  --glass-faint:  rgba(255,255,255,.36);
+  --glass-edge:   1px solid rgba(255,255,255,.65);
+  --blur:         saturate(180%) blur(24px);
+  --blur-strong:  saturate(180%) blur(34px);
+
+  /* Type */
+  --jp: 'Noto Sans JP', 'Hiragino Sans', system-ui, sans-serif;
+  --sf: -apple-system, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+  --num: -apple-system, 'SF Pro Rounded', 'SF Pro Display', system-ui, sans-serif;
+
+  /* Radii & shadows */
+  --r-sm: 12px;
+  --r-md: 18px;
+  --r-lg: 24px;
+  --r-xl: 28px;
+  --r-pill: 999px;
+  --shadow-glass: 0 8px 32px rgba(27,44,42,.08), 0 2px 8px rgba(27,44,42,.04);
+  --shadow-pop:   0 12px 40px rgba(27,44,42,.16), 0 30px 70px rgba(27,44,42,.14);
+  --shadow-fab:   0 8px 20px rgba(184,134,42,.42), 0 2px 6px rgba(184,134,42,.3);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--jp);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+.num { font-family: var(--num); font-variant-numeric: tabular-nums; }
+.sf  { font-family: var(--sf); }
+
+/* ── App shell with 3-layer background ── */
+.app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+/* layer 0: soft gradient */
+.app-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background: linear-gradient(158deg, #D9EAEC 0%, #C2DFDB 42%, #EFE3AE 100%);
+}
+/* layer 0b: organic blurred blobs */
+.app-bg::before, .app-bg::after {
+  content: ''; position: absolute; border-radius: 50%;
+  filter: blur(50px); opacity: .55;
+}
+.app-bg::before {
+  width: 340px; height: 340px; top: -90px; right: -110px;
+  background: radial-gradient(circle, rgba(104,166,155,.7), transparent 70%);
+}
+.app-bg::after {
+  width: 320px; height: 320px; bottom: 60px; left: -120px;
+  background: radial-gradient(circle, rgba(242,205,92,.55), transparent 70%);
+}
+.app-blob {
+  position: absolute; z-index: 0; border-radius: 50%;
+  width: 240px; height: 240px; top: 320px; right: -80px;
+  background: radial-gradient(circle, rgba(180,217,213,.85), transparent 70%);
+  filter: blur(48px); opacity: .6;
+}
+
+.app-scroll {
+  flex: 1; position: relative; z-index: 1;
+  overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+.app-scroll::-webkit-scrollbar { width: 0; height: 0; }
+
+.hide-scroll::-webkit-scrollbar { width: 0; height: 0; display: none; }
+.hide-scroll { scrollbar-width: none; -ms-overflow-style: none; }
+
+/* ── Glass utility ── */
+.glass {
+  background: var(--glass);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border: var(--glass-edge);
+  box-shadow: var(--shadow-glass);
+}
+.glass-strong {
+  background: var(--glass-strong);
+  backdrop-filter: var(--blur-strong);
+  -webkit-backdrop-filter: var(--blur-strong);
+  border: var(--glass-edge);
+}
+/* Frosted-solid — same look as .glass but NO backdrop-filter.
+   Used for list items that repeat many times (backdrop-filter on dozens of
+   stacked elements in a scroller breaks GPU compositing in Chrome). */
+.card-frost {
+  background: rgba(255,255,255,.62);
+  border: 1px solid rgba(255,255,255,.72);
+  box-shadow: var(--shadow-glass);
+}
+
+button { font-family: inherit; cursor: pointer; }
+
+/* ── Animations ── */
+@keyframes fadeUp { from { opacity:0; transform:translateY(10px);} to {opacity:1; transform:none;} }
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+@keyframes popIn { 0%{opacity:0;transform:scale(.85);} 60%{opacity:1;transform:scale(1.05);} 100%{transform:scale(1);} }
+@keyframes sheetUp { from { transform:translateY(100%); } to { transform:translateY(0); } }
+@keyframes toastIn { from {opacity:0; transform:translate(-50%,16px);} to {opacity:1; transform:translate(-50%,0);} }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes shimmer { 0%{background-position:-200% 0;} 100%{background-position:200% 0;} }
+
+/* striped photo placeholder texture */
+.ph-stripes {
+  background-image: repeating-linear-gradient(-45deg,
+    rgba(255,255,255,.35) 0px, rgba(255,255,255,.35) 2px,
+    transparent 2px, transparent 9px);
+}

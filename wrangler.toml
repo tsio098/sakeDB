@@ -1,0 +1,14 @@
+# Cloudflare Workers — 日本酒DB 静的サイト配信設定
+# 使い方:
+#   npm install -g wrangler   （初回のみ）
+#   wrangler login            （初回のみ、ブラウザで認証）
+#   wrangler deploy           （このフォルダで実行）
+
+name = "sake-db"
+compatibility_date = "2025-01-01"
+
+# Static Assets 機能で webapp/ の中身をそのまま配信
+[assets]
+directory = "./"
+# SPAなのでルーティング失敗時は index.html にフォールバック
+not_found_handling = "single-page-application"
