@@ -67,8 +67,8 @@ function DetailSheet({ sake, mood, onClose, onEdit, onDelete }) {
           {/* actions */}
           {!confirmDel ? (
             <div style={{ display:'flex', gap:10 }}>
-              <Button variant="soft" full leftIcon="edit" onClick={onEdit}>編集</Button>
               <Button variant="danger" leftIcon="trash" onClick={()=>setConfirmDel(true)} style={{ flexShrink:0, width:54, padding:0 }}> </Button>
+              <Button variant="soft" full leftIcon="edit" onClick={onEdit}>編集</Button>
             </div>
           ) : (
             <div className="glass" style={{ borderRadius:'var(--r-md)', padding:16, animation:'fadeUp .25s', border:'1.5px solid rgba(192,73,47,.25)' }}>

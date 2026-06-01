@@ -6,6 +6,9 @@
 function Sheet({ open, onClose, title, children, maxHeight = '86%', footer }) {
   const [mounted, setMounted] = useState(open);
   const [shown, setShown] = useState(false);
+  const [dragY, setDragY] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const dragStartRef = useRef(null);
   const sheetRef = useRef(null);
   useEffect(() => {
     if (open) setMounted(true);
@@ -17,6 +20,8 @@ function Sheet({ open, onClose, title, children, maxHeight = '86%', footer }) {
       return () => clearTimeout(id);
     }
   }, [open]);
+  // 閉じ動作の時に dragY をリセット
+  useEffect(() => { if (!open) setDragY(0); }, [open]);
   // Reveal once mounted: force a reflow so the translateY(101%) start frame is
   // committed, then flip to translateY(0) so the CSS transition runs. No timer →
   // not affected by background-tab throttling.
@@ -27,6 +32,38 @@ function Sheet({ open, onClose, title, children, maxHeight = '86%', footer }) {
     }
   }, [mounted, open]);
   if (!mounted) return null;
+
+  // ── Swipe-down handlers (ハンドル領域でドラッグして閉じる) ──
+  const onDragStart = (e) => {
+    const y = e.touches ? e.touches[0].clientY : e.clientY;
+    dragStartRef.current = { startY: y, startTime: Date.now() };
+    setDragging(true);
+  };
+  const onDragMove = (e) => {
+    if (!dragStartRef.current) return;
+    const y = e.touches ? e.touches[0].clientY : e.clientY;
+    const dy = Math.max(0, y - dragStartRef.current.startY);
+    setDragY(dy);
+  };
+  const onDragEnd = (e) => {
+    if (!dragStartRef.current) return;
+    const { startY, startTime } = dragStartRef.current;
+    const y = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+    const dy = Math.max(0, y - startY);
+    const dt = Math.max(1, Date.now() - startTime);
+    const velocity = dy / dt; // px / ms
+    dragStartRef.current = null;
+    setDragging(false);
+    if (dy > 100 || velocity > 0.5) {
+      onClose();
+    } else {
+      setDragY(0); // スナップバック
+    }
+  };
+
+  const baseTransform = shown ? `translateY(${dragY}px)` : 'translateY(101%)';
+  const transition = dragging ? 'none' : 'transform .42s cubic-bezier(.22,1,.36,1)';
+
   return (
     <div style={{
       position:'fixed', inset:0, zIndex:80,
@@ -36,7 +73,8 @@ function Sheet({ open, onClose, title, children, maxHeight = '86%', footer }) {
       {/* scrim */}
       <div onClick={onClose} style={{
         position:'absolute', inset:0, background:'rgba(20,34,32,.34)',
-        opacity: shown?1:0, transition:'opacity .34s ease',
+        opacity: shown ? Math.max(0, 1 - dragY/400) : 0,
+        transition: dragging ? 'none' : 'opacity .34s ease',
       }} />
       {/* sheet */}
       <div ref={sheetRef} onTransitionEnd={(e)=>{ if(e.target===e.currentTarget && !open) setMounted(false); }} style={{
@@ -45,11 +83,21 @@ function Sheet({ open, onClose, title, children, maxHeight = '86%', footer }) {
         borderTopLeftRadius:28, borderTopRightRadius:28,
         borderTop:'1px solid rgba(255,255,255,.9)',
         boxShadow:'var(--shadow-pop)',
-        transform: shown?'translateY(0)':'translateY(101%)',
-        transition:'transform .42s cubic-bezier(.22,1,.36,1)',
+        transform: baseTransform,
+        transition,
       }}>
-        {/* handle */}
-        <div style={{ display:'flex', justifyContent:'center', paddingTop:10, paddingBottom:2 }}>
+        {/* handle (ドラッグで閉じる) */}
+        <div
+          onTouchStart={onDragStart}
+          onTouchMove={onDragMove}
+          onTouchEnd={onDragEnd}
+          onTouchCancel={onDragEnd}
+          style={{
+            display:'flex', justifyContent:'center',
+            paddingTop:10, paddingBottom:12,
+            touchAction:'none',
+            cursor:'grab',
+          }}>
           <div style={{ width:40, height:5, borderRadius:3, background:'rgba(27,44,42,.18)' }} />
         </div>
         {title && (
