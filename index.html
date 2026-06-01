@@ -63,11 +63,37 @@
 <script type="text/babel" src="browse.jsx"></script>
 <script type="text/babel" src="app.jsx"></script>
 
-<!-- Service Worker（オフラインキャッシュ） -->
+<!-- Service Worker（オフラインキャッシュ＋頻繁な更新確認） -->
 <script>
   if ('serviceWorker' in navigator) {
+    // 初回登録時は controller が無い → リロード不要
+    const wasUncontrolled = !navigator.serviceWorker.controller;
+    let refreshing = false;
+
+    // 新しいSWが制御を取った時に自動リロード（デプロイ即反映）
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (wasUncontrolled) return; // 初回登録時はスキップ
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
+
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('service-worker.js').catch(console.error);
+      navigator.serviceWorker.register('service-worker.js').then(reg => {
+        // 起動時に更新チェック
+        reg.update().catch(() => {});
+
+        // 30秒ごとに更新チェック
+        setInterval(() => reg.update().catch(() => {}), 30 * 1000);
+
+        // アプリ復帰時にも更新チェック（バックグラウンド復帰・PWA再表示）
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') {
+            reg.update().catch(() => {});
+          }
+        });
+        window.addEventListener('focus', () => reg.update().catch(() => {}));
+      }).catch(console.error);
     });
   }
 </script>
