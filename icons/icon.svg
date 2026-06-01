@@ -1,47 +1,37 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#D1E3E6"/>
-      <stop offset="45%" stop-color="#B4D9D5"/>
-      <stop offset="100%" stop-color="#68A69B"/>
+    <linearGradient id="bg" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#E8CB47"/>
+      <stop offset="30%" stop-color="#84B566"/>
+      <stop offset="65%" stop-color="#45A29A"/>
+      <stop offset="100%" stop-color="#357AA3"/>
     </linearGradient>
-    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#F7DA78"/>
-      <stop offset="100%" stop-color="#F2CD5C"/>
-    </linearGradient>
-    <radialGradient id="glow" cx="0.3" cy="0.25" r="0.7">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.85"/>
-      <stop offset="55%" stop-color="#ffffff" stop-opacity="0.25"/>
-      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
-    </radialGradient>
+    <filter id="softshadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feOffset dx="0" dy="6" result="offset"/>
+      <feComposite in="SourceGraphic" in2="offset" operator="over"/>
+    </filter>
   </defs>
 
-  <!-- 背景 -->
-  <rect width="512" height="512" fill="url(#bg)"/>
-  <rect width="512" height="512" fill="url(#glow)" opacity="0.7"/>
+  <!-- フルブリードのグラデーション背景 -->
+  <rect width="1024" height="1024" fill="url(#bg)"/>
 
-  <!-- ガラス円 -->
-  <circle cx="256" cy="256" r="170" fill="rgba(255,255,255,0.55)" stroke="rgba(255,255,255,0.75)" stroke-width="2"/>
-  <circle cx="256" cy="256" r="170" fill="url(#glow)" opacity="0.6"/>
-
-  <!-- 酒の徳利シルエット -->
-  <g transform="translate(256 268)" fill="none" stroke="#1b2c2a" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">
-    <!-- 徳利の本体 -->
-    <path d="M -56 -56
-             L -56 -96
-             Q -56 -108 -44 -108
-             L 44 -108
-             Q 56 -108 56 -96
-             L 56 -56
-             Q 92 -28 92 32
-             Q 92 90 32 96
-             L -32 96
-             Q -92 90 -92 32
-             Q -92 -28 -56 -56 Z" fill="rgba(255,255,255,0.85)"/>
-    <!-- 注ぎ口 -->
-    <line x1="-28" y1="-108" x2="28" y2="-108"/>
+  <!-- 徳利シルエット -->
+  <g fill="none" stroke="#FFFFFF" stroke-width="40" stroke-linecap="round" stroke-linejoin="round">
+    <!-- 本体の輪郭（rim + neck + body + bottom を1ストロークで） -->
+    <path d="
+      M 386 218
+      L 638 218
+      L 638 302
+      Q 638 332 660 358
+      Q 762 432 766 600
+      Q 770 808 512 822
+      Q 254 808 258 600
+      Q 262 432 364 358
+      Q 386 332 386 302
+      Z
+    "/>
+    <!-- 横方向の仕切り線 -->
+    <line x1="318" y1="608" x2="706" y2="608"/>
   </g>
-
-  <!-- ゴールドアクセント（雫） -->
-  <circle cx="332" cy="180" r="14" fill="url(#gold)" opacity="0.9"/>
 </svg>
