@@ -17,22 +17,45 @@ function App() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
+  const lastFetchRef = useRef(0);
 
-  // 起動時に GAS から最新を取得し、ローカルキャッシュを更新
-  useEffect(() => {
+  // 共通の再フェッチ関数
+  const fetchList = React.useCallback(async (opts = {}) => {
     if (!window.API || !window.API.list) return;
-    setIsLoading(true);
-    window.API.list()
-      .then(fresh => {
-        if (Array.isArray(fresh) && fresh.length) {
-          setData(fresh);
-          try { localStorage.setItem('sakedb', JSON.stringify(fresh)); } catch (e) {}
-        }
-        setIsError(false);
-      })
-      .catch(() => setIsError(true))
-      .finally(() => setIsLoading(false));
+    // 連続フェッチ防止（最小5秒）
+    if (!opts.force && Date.now() - lastFetchRef.current < 5000) return;
+    lastFetchRef.current = Date.now();
+    try {
+      const fresh = await window.API.list();
+      if (Array.isArray(fresh) && fresh.length) {
+        setData(fresh);
+        try { localStorage.setItem('sakedb', JSON.stringify(fresh)); } catch (e) {}
+      }
+      setIsError(false);
+    } catch (e) {
+      setIsError(true);
+    }
   }, []);
+
+  // 起動時：ローディング表示付きで取得
+  useEffect(() => {
+    setIsLoading(true);
+    fetchList({ force: true }).finally(() => setIsLoading(false));
+  }, [fetchList]);
+
+  // タブが再アクティブになった時に最新化（バックグラウンド復帰・PWA再表示）
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') fetchList();
+    };
+    const onFocus = () => fetchList();
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('focus', onFocus);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [fetchList]);
 
   // localStorage への永続化（オフラインキャッシュ）
   useEffect(() => {
