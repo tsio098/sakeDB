@@ -23,6 +23,19 @@ function Sheet({ open, onClose, title, children, maxHeight = '86%', footer }) {
   }, [open]);
   // 閉じ動作の時に dragY をリセット
   useEffect(() => { if (!open) setDragY(0); }, [open]);
+  // シート表示中は背景のスクロールをロック（スクロールチェイン防止）
+  useEffect(() => {
+    if (!open) return;
+    const appScroll = document.querySelector('.app-scroll');
+    const prevAppOverflow = appScroll ? appScroll.style.overflow : '';
+    const prevBodyOverflow = document.body.style.overflow;
+    if (appScroll) appScroll.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    return () => {
+      if (appScroll) appScroll.style.overflow = prevAppOverflow;
+      document.body.style.overflow = prevBodyOverflow;
+    };
+  }, [open]);
   // Reveal once mounted: force a reflow so the translateY(101%) start frame is
   // committed, then flip to translateY(0) so the CSS transition runs. No timer →
   // not affected by background-tab throttling.
@@ -156,7 +169,11 @@ function Sheet({ open, onClose, title, children, maxHeight = '86%', footer }) {
           onTouchMove={onDragMove}
           onTouchEnd={onDragEnd}
           onTouchCancel={onDragEnd}
-          style={{ overflowY:'auto', padding:'0 20px', flex:1 }}>
+          style={{
+            overflowY:'auto', padding:'0 20px', flex:1,
+            overscrollBehavior:'contain',
+            WebkitOverflowScrolling:'touch',
+          }}>
           {children}
         </div>
         {footer && <div style={{ padding:'12px 20px calc(12px + env(safe-area-inset-bottom))' }}>{footer}</div>}
