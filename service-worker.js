@@ -4,7 +4,7 @@
    - GAS API は常にネットワーク（キャッシュしない）
 */
 
-const VERSION = 'sake-db-v3';
+const VERSION = 'sake-db-v4';
 const STATIC_ASSETS = [
   './',
   './index.html',
