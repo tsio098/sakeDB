@@ -6,7 +6,9 @@ main = "_worker.js"
 compatibility_date = "2025-01-01"
 
 # 静的アセットを env.ASSETS にバインド
+# run_worker_first = true でWorkerを必ず先に実行（/api ルートをWorkerが処理できるように）
 [assets]
 directory = "./"
 binding = "ASSETS"
 not_found_handling = "single-page-application"
+run_worker_first = true
