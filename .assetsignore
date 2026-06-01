@@ -1,0 +1,8 @@
+# 静的アセットとしてアップロードしないファイル
+_worker.js
+wrangler.toml
+.assetsignore
+.gitignore
+.git/
+README.md
+gas/
