@@ -26,19 +26,33 @@ const TAG_SYNONYMS = {
   'おりがらみ':['おりがらみ','おりがら','澱'],
 };
 
+// ひらがな↔カタカナを同一視するための正規化（小文字化も）
+function normalizeText(s) {
+  return (s || '')
+    .replace(/[ぁ-ゖ]/g, m => String.fromCharCode(m.charCodeAt(0) + 0x60))
+    .toLowerCase();
+}
+
 function detectTags(name, place, review, current) {
   const text = `${name||''} ${place||''} ${review||''}`;
+  const nText = normalizeText(text);
   const found = new Set();
-  // prefecture
+  // 選択された都道府県
   if (place) found.add(place);
-  // kinds (literal match in name/review)
-  window.KINDS.forEach(k => { if (text.includes(k)) found.add(k); });
-  // flavors via synonyms
-  Object.entries(TAG_SYNONYMS).forEach(([tag, syns]) => {
-    if (syns.some(s => text.includes(s))) found.add(tag);
+  // 都道府県名がテキストに含まれていれば自動追加（県名 or 県/府/都/道を外した短縮形も対応）
+  window.PREFECTURES.forEach(p => {
+    if (text.includes(p)) { found.add(p); return; }
+    const short = p.replace(/[県府都道]$/, '');
+    if (short.length >= 2 && text.includes(short)) found.add(p);
   });
-  // exact flavor literals too
-  window.FLAVORS.forEach(f => { if (text.includes(f)) found.add(f); });
+  // 種類タグ（純米吟醸等）
+  window.KINDS.forEach(k => { if (text.includes(k)) found.add(k); });
+  // 味・香りタグ（同義語辞書経由）— ひら/カタ同一視
+  Object.entries(TAG_SYNONYMS).forEach(([tag, syns]) => {
+    if (syns.some(s => nText.includes(normalizeText(s)))) found.add(tag);
+  });
+  // 味タグそのものがテキストにあれば（同一視あり）
+  window.FLAVORS.forEach(f => { if (nText.includes(normalizeText(f))) found.add(f); });
   return [...found].filter(t => !current.includes(t));
 }
 

@@ -187,9 +187,11 @@ function FilterSheet({ type, open, onClose, data, filters, setFilters }) {
   const [q, setQ] = useState('');
   useEffect(()=>{ if(open) setQ(''); }, [open, type]);
 
-  // prefecture counts
+  // prefecture counts（空欄は除外）
   const prefCounts = useMemo(()=>{
-    const m = {}; data.forEach(s => m[s.place]=(m[s.place]||0)+1); return m;
+    const m = {};
+    data.forEach(s => { if (s.place) m[s.place]=(m[s.place]||0)+1; });
+    return m;
   }, [data]);
   const prefList = useMemo(()=> Object.keys(prefCounts)
     .sort((a,b)=>prefCounts[b]-prefCounts[a])
