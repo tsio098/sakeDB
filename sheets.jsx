@@ -29,7 +29,7 @@ function Sheet({ open, onClose, title, children, maxHeight = '86%', footer }) {
   if (!mounted) return null;
   return (
     <div style={{
-      position:'absolute', inset:0, zIndex:80,
+      position:'fixed', inset:0, zIndex:80,
       display:'flex', flexDirection:'column', justifyContent:'flex-end',
       pointerEvents: open?'auto':'none',
     }}>
