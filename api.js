@@ -5,12 +5,12 @@
    - 画像はクライアント側でリサイズしてから送信
    ─────────────────────────────────────────────────────────── */
 
-// GAS Web App URL（デプロイ済み）
-const API_BASE = 'https://script.google.com/macros/s/AKfycbzslz1QWMUvvM1sb8Zde4LvMohqKns4WN4FZLfBPPq7reAIo7z_NFht0YLOAJcJlVPi/exec';
+// 同一オリジンのプロキシエンドポイント（_worker.js が /api を GAS にプロキシ）
+const API_BASE = '/api';
 
 // ─── 内部ヘルパー ───
 function _isConfigured() {
-  return !!API_BASE && /^https?:\/\//.test(API_BASE);
+  return !!API_BASE;
 }
 
 async function _get(action) {
