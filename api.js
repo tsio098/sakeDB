@@ -5,8 +5,8 @@
    - 画像はクライアント側でリサイズしてから送信
    ─────────────────────────────────────────────────────────── */
 
-// ⚠️ デプロイ後の Web App URL に書き換えること
-const API_BASE = '';
+// GAS Web App URL（デプロイ済み）
+const API_BASE = 'https://script.google.com/macros/s/AKfycbzslz1QWMUvvM1sb8Zde4LvMohqKns4WN4FZLfBPPq7reAIo7z_NFht0YLOAJcJlVPi/exec';
 
 // ─── 内部ヘルパー ───
 function _isConfigured() {
