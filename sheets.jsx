@@ -10,6 +10,7 @@ function Sheet({ open, onClose, title, children, maxHeight = '86%', footer }) {
   const [dragging, setDragging] = useState(false);
   const dragStartRef = useRef(null);
   const sheetRef = useRef(null);
+  const scrollRef = useRef(null);
   useEffect(() => {
     if (open) setMounted(true);
     else {
@@ -36,7 +37,6 @@ function Sheet({ open, onClose, title, children, maxHeight = '86%', footer }) {
   // ── Swipe-down handlers ──
   // ハンドル領域：常にドラッグ可能（mode='drag'）
   // コンテンツ領域：scrollTop=0 で下方向に引いた時のみドラッグ判定（scroll/dragを自動判別）
-  const scrollRef = useRef(null);
 
   const onHandleStart = (e) => {
     const y = e.touches ? e.touches[0].clientY : e.clientY;
